@@ -60,6 +60,8 @@ const environmentMapTexture = cubeTextureLoader.load([
  */
 // World
 const world = new CANNON.World();
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
 world.gravity.set(0, -9.82, 0); // is is a Vec3 not a Vector3 (Cannon.js)
 
 // Materials  - physics
