@@ -28,7 +28,7 @@ debugObject.createBox = () => {
     y: 3,
     z: (Math.random() - 0.5) * 3,
   });
-}
+};
 gui.add(debugObject, "createBox");
 
 /**
@@ -39,6 +39,20 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Sounds
+ */
+const hitSound = new Audio("/sounds/hit.mp3");
+const playHitSound = (collisionEvent) => {
+  const impactStrength = collisionEvent.contact.getImpactVelocityAlongNormal();
+  if (impactStrength > 1.5) {
+    const soundStrength = Math.min(impactStrength / 10, 1); // sound strength between 0 and 1
+      hitSound.volume = soundStrength;
+    hitSound.currentTime = 0;
+    hitSound.play();
+  }
+};
 
 /**
  * Textures
@@ -223,13 +237,16 @@ const createBox = (width, height, depth, position) => {
   scene.add(mesh);
 
   // Cannon.js body
-  const shape = new CANNON.Box(new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5))
+  const shape = new CANNON.Box(
+    new CANNON.Vec3(width * 0.5, height * 0.5, depth * 0.5)
+  );
   const body = new CANNON.Body({
     mass: width * height * depth, // volume of a cube, homogeneous density
     position: new CANNON.Vec3(position.x, position.y, position.z),
     shape,
     material: defaultMaterial,
   });
+  body.addEventListener("collide", playHitSound);
   world.addBody(body);
   // Save in objects to update
   objectsToUpdate.push({ mesh, body });
