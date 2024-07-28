@@ -44,29 +44,30 @@ const parameters = { sphereRadius: 0.5 };
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0); // is is a Vec3 not a Vector3 (Cannon.js)
 
-// Matrials 
-const concreteMaterial = new CANNON.Material('concrete')
-const plasticMaterial = new CANNON.Material('plastic')
+// Materials  - physics
+const defaultMaterial = new CANNON.Material('default')
 
-const concretePlasticContactMaterial = new CANNON.ContactMaterial(
-  concreteMaterial,
-  plasticMaterial,
+const defaultContactMaterial = new CANNON.ContactMaterial(
+  defaultMaterial,
+  defaultMaterial,
   {
     friction: 0.1,
     restitution: 0.7,
   }
 )
 
-world.addContactMaterial(concretePlasticContactMaterial)
+world.addContactMaterial(defaultContactMaterial)
+world.defaultContactMaterial = defaultContactMaterial
 
-// Sphere
+// Sphere - physics
 const sphereShape = new CANNON.Sphere(parameters.sphereRadius);
 const sphereBody = new CANNON.Body({
   mass: 1,
   position: new CANNON.Vec3(0, 3, 0),
   shape: sphereShape,
-  material: plasticMaterial
 });
+sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0))
+
 world.addBody(sphereBody);
 
 // Floor 
@@ -74,7 +75,6 @@ const floorShape = new CANNON.Plane()
 const floorBody = new CANNON.Body()
 floorBody.mass = 0 // this is actually the default value and will make it a body with infinite mass (an anchor)
 floorBody.addShape(floorShape)
-floorBody.material = concreteMaterial
 floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0 ,0), Math.PI* 0.5)
 world.addBody(floorBody)
 
@@ -190,6 +190,8 @@ const tick = () => {
   oldElapsedTime = elapsedTime;
 
   // Update physics world
+
+  sphereBody.applyForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position)
 
   // run simulation with fixed time step of 1/60s
   // the time since the last simulation is passed as the second argument
