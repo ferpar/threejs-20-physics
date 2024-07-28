@@ -213,6 +213,7 @@ const createSphere = (radius, position) => {
     shape,
     material: defaultMaterial,
   });
+  body.addEventListener("collide", playHitSound);
   world.addBody(body);
   // Save in objects to update
   objectsToUpdate.push({ mesh, body });
